@@ -3,6 +3,8 @@
 <script src="https://d3js.org/d3.v5.js"></script>
 <script src="https://d3js.org/d3-shape.v1.min.js"></script>
 <script src="https://d3js.org/d3-scale.v2.min.js"></script>
+<script src="https://d3js.org/d3-axis.v1.min.js"></script>
+
 
 
 <!-- <script src="https://d3js.org/d3.v5.js"></script> -->
@@ -11,11 +13,15 @@
 
 	rect {
 		border: 1px solid red;
-		transition: opacity 0.5s;
+		transition: opacity 0.2s;
 		opacity: 1;
 	}	
 
-	.blurred {
+	.hover, .active {
+		opacity: 1 !important;
+	}
+
+	.blurred, .stay-blurred {
 		opacity: 0.5;
 	}
 </style>
@@ -26,7 +32,6 @@
 <button onclick="addDataPoint()">+</button>
 <script>
 
-console.log(d3)
 
 const margin = {top: 20, right: 160, bottom: 35, left: 30};
 const width = 960 - margin.left - margin.right;
@@ -88,6 +93,10 @@ const colors = [
 	'rgba(224, 224, 224, 1)',
 ];
 
+var xAxis = d3.axisBottom(calcX);
+console.log('xAxis: ', xAxis);
+
+
 const svg = d3
 	.select("#svg")
 	.attr("height", height)
@@ -95,16 +104,28 @@ const svg = d3
 
 function handleMouseOver(d, i) {
 	const index = [...this.parentNode.children].indexOf(this);
+	svg.selectAll(`g.cost rect:nth-child(${index + 1})`).classed("hover", true)
+
 	svg.selectAll(`g.cost rect:not(:nth-child(${index + 1}))`).classed("blurred", true)
 }
 
+function handleMouseClick(d, i) {
+	const index = [...this.parentNode.children].indexOf(this);
+	svg.selectAll("g.cost rect").classed("stay-blurred", false)
+	svg.selectAll("g.cost rect").classed("active", false)
+	svg.selectAll(`g.cost rect:nth-child(${index + 1})`).classed("active", true);
+	svg.selectAll(`g.cost rect:not(:nth-child(${index + 1}))`).classed("stay-blurred", true)
+
+}
+
 function handleMouseOut(d, i) {
+	const index = [...this.parentNode.children].indexOf(this);
 	svg.selectAll("g.cost rect").classed("blurred", false)
+	svg.selectAll("g.cost rect").classed("hover", false)
 }
 
 function render() {
 	const series = stack(data2);
-	console.log('series: ', series);
 
 	const groups = svg.selectAll("g.cost")
 	.data(series)
@@ -112,7 +133,6 @@ function render() {
 	.attr("class", 'cost')
 	.attr("fill", (d,i) => { return colors[i]})
 
-	console.log('groups', groups);
 
 	const rect = groups.selectAll("rect")
 		.data(d => d)
@@ -124,9 +144,9 @@ function render() {
 		.attr("y", d => height - calcY(d[1]))
 		.attr("opacity", 1)
 		.on("mouseover", handleMouseOver)
-		.on("mouseout", handleMouseOut);
+		.on("mouseout", handleMouseOut)
+		.on("click", handleMouseClick)
 
-	console.log('rect: ', rect);
 }
 
 render();
