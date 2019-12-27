@@ -12,10 +12,20 @@
 <style>
 
 	svg {
-		box-shadow: inset 0px 0px 0 10px red;
-		border: 1px solid black
+		/* box-shadow: inset 0px 0px 0 10px rgba(255, 0, 0, 0.1); */
+		/* border: 1px solid black; */
 	}
 
+	.tick text {
+		transform: translateY(10px);
+		font-size: 12px;
+		fill: grey;
+	}
+
+	.tick text.active {
+		fill: rgba(63, 150, 130, 1);
+		font-weight: bold;
+	}
 
 	rect {
 		transition: opacity 0.2s;
@@ -38,7 +48,7 @@
 <script>
 
 
-const margin = {top: 10, right: 10, bottom: 10, left: 10};
+const margin = {top: 10, right: 10, bottom: 50, left: 10};
 const width = 500
 const height = 300
 
@@ -90,7 +100,6 @@ const svg = d3
 function handleMouseOver(d, i) {
 	const index = [...this.parentNode.children].indexOf(this);
 	svg.selectAll(`g.cost rect:nth-child(${index + 1})`).classed("hover", true)
-
 	svg.selectAll(`g.cost rect:not(:nth-child(${index + 1}))`).classed("blurred", true)
 }
 
@@ -98,9 +107,10 @@ function handleMouseClick(d, i) {
 	const index = [...this.parentNode.children].indexOf(this);
 	svg.selectAll("g.cost rect").classed("stay-blurred", false)
 	svg.selectAll("g.cost rect").classed("active", false)
+	svg.selectAll(`g.legendX .tick text`).classed("active", false)
 	svg.selectAll(`g.cost rect:nth-child(${index + 1})`).classed("active", true);
 	svg.selectAll(`g.cost rect:not(:nth-child(${index + 1}))`).classed("stay-blurred", true)
-
+	svg.selectAll(`g.legendX .tick:nth-child(${index + 2}) text`).classed("active", true)
 }
 
 function handleMouseOut(d, i) {
@@ -126,14 +136,20 @@ function render() {
 
 	const x = d3.scaleBand()
 	.domain(data2.map(d => d.month))
-	.range([0, width])
-	// .padding(.05);
+	.range([0, width - margin.left - margin.right])
+	.padding(.1);
 
-	var xAxis = d3.axisBottom(x);
 
-	svg.append("g")
-		// .attr("transform", `translate(0, ${height - margin.bottom})`)
-		.attr("transform", `translate(0, ${height})`)
+	var xAxis = d3
+		.axisBottom(x)
+		.tickSize(0)
+		.tickFormat(d => d.charAt(0).toUpperCase());
+
+	svg.selectAll("g.legendX").remove();
+
+	const legend = svg.append("g")
+		.attr("class", "legendX")
+		.attr("transform", `translate(${margin.left}, ${height - margin.bottom + 20})`)
 		.call(xAxis)
 
 	const groups = svg.selectAll("g.cost")
@@ -147,10 +163,8 @@ function render() {
 		.data(d => d)
 		.join("rect")
 		.attr("height", d => y(d[1] - d[0]))
-		// .attr("width", x.bandwidth())
-		.attr("width", width / data2.length)
-		// .attr("x", (d, i) => { return x(i) })
-		.attr("x", function(d, i) { return i * width / data2.length; })
+		.attr("width", x.bandwidth())
+		.attr("x", (d, i) => x(d.data.month) + margin.left)
 		.attr("y", d => height - y(d[1]) - margin.bottom)
 		.attr("opacity", 1)
 		.on("mouseover", handleMouseOver)
@@ -163,7 +177,7 @@ render();
 
 function addDataPoint() {
 	data2.push({
-		month: "nog een maand",
+		month:  Math.random().toString(36).substring(2, 4) + Math.random().toString(36).substring(2, 4), //random string
 		setup: Math.floor(Math.random() * 50),
 		monthly: Math.floor(Math.random() * 50),
 		usage: Math.floor(Math.random() * 50),
