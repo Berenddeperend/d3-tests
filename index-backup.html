@@ -1,0 +1,148 @@
+<html>
+<head>
+<script src="https://d3js.org/d3.v5.js"></script>
+<script src="https://d3js.org/d3-shape.v1.min.js"></script>
+<script src="https://d3js.org/d3-scale.v2.min.js"></script>
+
+<!-- <script src="https://d3js.org/d3.v5.js"></script> -->
+
+<style>
+
+	rect {
+		border: 1px solid red;
+	}
+</style>
+</head>
+<body>
+<svg id="svg"></svg>
+
+<script>
+
+console.log(d3)
+
+function createStackedBar() {
+
+	const margin = {top: 20, right: 160, bottom: 35, left: 30};
+	const width = 960 - margin.left - margin.right;
+	const height = 300 - margin.top - margin.bottom;
+
+	const data2 = [
+		{
+			month: "januari",
+			setup: 20,
+			monthly: 43,
+			usage: 30,
+		},
+		{
+			month: "februari",
+			setup: 2,
+			monthly: 3,
+			usage: 9,
+		},
+		{
+			month: "maart",
+			setup: 14,
+			monthly: 33,
+			usage: 2,
+		},
+		{
+			month: "april",
+			setup: 29,
+			monthly: 3,
+			usage: 32,
+		}
+	]
+
+	const calcY = d3.scaleLinear()
+		.domain([0, d3.max(data2.map(d => { //add every property except for 'month'
+			return Object
+				.keys(d)
+				.filter(key => key !== 'month')
+				.reduce((acc, curr) => {
+					acc += d[curr]
+					return acc;
+				}, 0);
+		}))])
+		.range([0, height])
+
+	const calcX = d3.scaleBand()
+    .domain(data2.map(d => d.month))
+    .range([0, width])
+    .padding(.05);
+	
+
+	const stack = d3 //works
+		.stack()
+		.keys(Object.keys(data2[0]).filter(key => key !== 'month'))
+		.order(d3.stackOrderNone)
+    .offset(d3.stackOffsetNone);
+
+	const series = stack(data2);
+	console.log('series: ', series);
+
+	const colors = [
+		'rgba(16, 32, 88, 1)',
+		'rgba(63, 150, 130, 1)',
+		'rgba(224, 224, 224, 1)',
+	];
+
+	const svg = d3
+		.select("#svg")
+		.attr("height", height)
+		.attr("width", width)
+
+
+	var groups = svg.selectAll("g.cost")
+		.data(series)
+		.enter()
+		.append("g")
+		.attr("class", 'cost')
+		.attr("fill", (d,i) => { return colors[i]})
+
+	console.log('groups', groups);
+
+	var rect = groups.selectAll("rect")
+		.data(d => d)
+		.enter()
+		.append("rect")
+		.attr("height", d => calcY(d[1] - d[0]))
+		.attr("width", calcX.bandwidth())
+		.attr("x", function(d, i) { return i * width / data2.length; })
+		.attr("y", d => height - calcY(d[1]))
+		.on("mouseover", handleMouseOver)
+
+	function handleMouseOver(d, i) {
+		console.log('yeet d i', d, i)
+	}
+}
+
+
+
+createStackedBar();
+
+function createSimpleBar() {
+	let data = [1, 5, 29, 12];
+	const width = 200;
+	const height = 200;
+	const calcY = d3.scaleLinear()
+		.domain([0, d3.max(data)])
+		.range([0, height])
+	const svg = d3
+		.select("#svg")
+		.attr("height", height)
+		.attr("width", width)
+		.selectAll("rect")
+		.data(data)
+		.enter()
+		.append("rect")
+		.attr("width", width / data.length)
+		.attr("x", (d, i) => width / data.length * i)
+		.attr("height", (d, i) => calcY(d))
+		.attr("y", (d, i) => height - calcY(d))
+}
+
+  
+</script>
+
+</body>
+</html>

@@ -1,0 +1,66 @@
+<html>
+<head>
+<script src="https://d3js.org/d3.v5.js"></script>
+<script src="https://d3js.org/d3-shape.v1.min.js"></script>
+<script src="https://d3js.org/d3-scale.v2.min.js"></script>
+
+
+<style>
+
+	rect {
+		border: 1px solid red;
+	}
+</style>
+</head>
+<body>
+<svg id="svg"></svg>
+
+<script>
+
+function getColor(i) {
+	const colors = [
+		'rgba(16, 32, 88, 1)',
+		'rgba(63, 150, 130, 1)',
+		'rgba(224, 224, 224, 1)',
+	];
+
+	return colors[i % 3];
+}
+
+let data = [1, 5, 29, 12];
+
+const width = 200;
+const height = 200;
+const calcY = d3.scaleLinear()
+	.domain([0, d3.max(data)])
+	.range([0, height])
+
+let svg = d3
+		.select("#svg")
+		.attr("height", height)
+		.attr("width", width);
+
+
+function render() {
+	let bar = svg	
+		.selectAll("rect")
+		.data(data)
+		.join("rect")
+		.attr("width", width / data.length)
+		.attr("x", (d, i) => width / data.length * i)
+		.attr("height", (d, i) => calcY(d))
+		.attr("y", (d, i) => height - calcY(d))
+		.attr("fill", (d,i) => getColor(i))
+}
+
+render();
+
+window.setInterval(()=> {
+	data.push(Math.floor(Math.random() * 31));
+	render();
+}, 20)
+
+</script>
+
+</body>
+</html>
