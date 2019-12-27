@@ -87,7 +87,13 @@ const svg = d3
 	.attr("width", width)
 
 function handleMouseOver(d, i) {
-	console.log('yeet d i', d, i)
+	const index = [...this.parentNode.children].indexOf(this);
+	svg.selectAll("g.cost rect").attr("opacity", 0.5)
+	svg.selectAll(`g.cost rect:nth-child(${index + 1})`).attr("opacity", 1)
+}
+
+function handleMouseOut(d, i) {
+	svg.selectAll("g.cost rect").attr("opacity", 1)
 }
 
 function render() {
@@ -110,7 +116,8 @@ function render() {
 		.attr("width", width / data2.length - 10)
 		.attr("x", function(d, i) { return i * width / data2.length; })
 		.attr("y", d => height - calcY(d[1]))
-		.on("mouseover", handleMouseOver);
+		.on("mouseover", handleMouseOver)
+		.on("mouseout", handleMouseOut);
 
 	console.log('rect: ', rect);
 }
