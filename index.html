@@ -11,8 +11,13 @@
 
 <style>
 
+	svg {
+		box-shadow: inset 0px 0px 0 10px red;
+		border: 1px solid black
+	}
+
+
 	rect {
-		border: 1px solid red;
 		transition: opacity 0.2s;
 		opacity: 1;
 	}	
@@ -33,9 +38,9 @@
 <script>
 
 
-const margin = {top: 20, right: 160, bottom: 35, left: 30};
-const width = 960 - margin.left - margin.right;
-const height = 300 - margin.top - margin.bottom;
+const margin = {top: 10, right: 10, bottom: 10, left: 10};
+const width = 500
+const height = 300
 
 const data2 = [
 	{
@@ -64,23 +69,6 @@ const data2 = [
 	}
 ]
 
-const calcY = d3.scaleLinear()
-	.domain([0, d3.max(data2.map(d => { //add every property except for 'month'
-		return Object
-			.keys(d)
-			.filter(key => key !== 'month')
-			.reduce((acc, curr) => {
-				acc += d[curr]
-				return acc;
-			}, 0);
-	}))])
-	.range([0, height])
-
-const calcX = d3.scaleBand()
-	.domain(data2.map(d => d.month))
-	.range([0, width])
-	.padding(.05);
-
 const stack = d3 //works
 	.stack()
 	.keys(Object.keys(data2[0]).filter(key => key !== 'month'))
@@ -93,14 +81,11 @@ const colors = [
 	'rgba(224, 224, 224, 1)',
 ];
 
-var xAxis = d3.axisBottom(calcX);
-console.log('xAxis: ', xAxis);
-
-
 const svg = d3
 	.select("#svg")
+	// .attr("viewBox", [0, 0, width, height]);
 	.attr("height", height)
-	.attr("width", width)
+	.attr("width", width);
 
 function handleMouseOver(d, i) {
 	const index = [...this.parentNode.children].indexOf(this);
@@ -127,6 +112,30 @@ function handleMouseOut(d, i) {
 function render() {
 	const series = stack(data2);
 
+	const y = d3.scaleLinear()
+	.domain([0, d3.max(data2.map(d => { //add every property except for 'month'
+		return Object
+			.keys(d)
+			.filter(key => key !== 'month')
+			.reduce((acc, curr) => {
+				acc += d[curr]
+				return acc;
+			}, 0);
+	}))])
+	.range([0, height - margin.top - margin.bottom]);
+
+	const x = d3.scaleBand()
+	.domain(data2.map(d => d.month))
+	.range([0, width])
+	// .padding(.05);
+
+	var xAxis = d3.axisBottom(x);
+
+	svg.append("g")
+		// .attr("transform", `translate(0, ${height - margin.bottom})`)
+		.attr("transform", `translate(0, ${height})`)
+		.call(xAxis)
+
 	const groups = svg.selectAll("g.cost")
 	.data(series)
 	.join("g")
@@ -137,11 +146,12 @@ function render() {
 	const rect = groups.selectAll("rect")
 		.data(d => d)
 		.join("rect")
-		.attr("height", d => calcY(d[1] - d[0]))
-		// .attr("width", calcX.bandwidth())
-		.attr("width", width / data2.length - 10)
+		.attr("height", d => y(d[1] - d[0]))
+		// .attr("width", x.bandwidth())
+		.attr("width", width / data2.length)
+		// .attr("x", (d, i) => { return x(i) })
 		.attr("x", function(d, i) { return i * width / data2.length; })
-		.attr("y", d => height - calcY(d[1]))
+		.attr("y", d => height - y(d[1]) - margin.bottom)
 		.attr("opacity", 1)
 		.on("mouseover", handleMouseOver)
 		.on("mouseout", handleMouseOut)
@@ -154,9 +164,9 @@ render();
 function addDataPoint() {
 	data2.push({
 		month: "nog een maand",
-		setup: Math.floor(Math.random() * 40),
-		monthly: Math.floor(Math.random() * 40),
-		usage: Math.floor(Math.random() * 40),
+		setup: Math.floor(Math.random() * 50),
+		monthly: Math.floor(Math.random() * 50),
+		usage: Math.floor(Math.random() * 50),
 	})
 
 	render();
