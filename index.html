@@ -4,12 +4,19 @@
 <script src="https://d3js.org/d3-shape.v1.min.js"></script>
 <script src="https://d3js.org/d3-scale.v2.min.js"></script>
 
+
 <!-- <script src="https://d3js.org/d3.v5.js"></script> -->
 
 <style>
 
 	rect {
 		border: 1px solid red;
+		transition: opacity 0.5s;
+		opacity: 1;
+	}	
+
+	.blurred {
+		opacity: 0.5;
 	}
 </style>
 </head>
@@ -88,12 +95,11 @@ const svg = d3
 
 function handleMouseOver(d, i) {
 	const index = [...this.parentNode.children].indexOf(this);
-	svg.selectAll("g.cost rect").attr("opacity", 0.5)
-	svg.selectAll(`g.cost rect:nth-child(${index + 1})`).attr("opacity", 1)
+	svg.selectAll(`g.cost rect:not(:nth-child(${index + 1}))`).classed("blurred", true)
 }
 
 function handleMouseOut(d, i) {
-	svg.selectAll("g.cost rect").attr("opacity", 1)
+	svg.selectAll("g.cost rect").classed("blurred", false)
 }
 
 function render() {
@@ -116,6 +122,7 @@ function render() {
 		.attr("width", width / data2.length - 10)
 		.attr("x", function(d, i) { return i * width / data2.length; })
 		.attr("y", d => height - calcY(d[1]))
+		.attr("opacity", 1)
 		.on("mouseover", handleMouseOver)
 		.on("mouseout", handleMouseOut);
 
