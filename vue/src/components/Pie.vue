@@ -1,10 +1,9 @@
 <template>
   <div class="pie-component">
     <table>
-      <tr v-for="(value, name) in dataWithoutMonth" :key="value.month">
-        {{name}}: {{value}}
-        <!-- <td>{{row.month}}</td> -->
-        <!-- <td>{{data}}</td> -->
+      <tr v-for="(value, name) in dataWithoutMonth" :key="value.month" @mouseover="yeet(name, value, $event)">
+        <td>{{name}}:</td>
+        <td>{{value}}</td>
       </tr>
     </table>
     
@@ -45,7 +44,7 @@ export default {
       return arc()
         .innerRadius(0)
         .outerRadius(Math.min(this.width, this.height) / 2 - 1)
-    }
+    },
   },
   mounted() {
     this.svg = select("#svg")
@@ -57,6 +56,7 @@ export default {
   },
   methods: {
     render() {
+      const self = this;
       this.svg.append("g")
           .attr("stroke", "white")
         .selectAll("path")
@@ -68,6 +68,23 @@ export default {
         .join("path")
           .attr("fill", (d,i) => this.colors[i % this.colors.length])
           .attr("d", this.calcArc)
+        .on("mouseover", function(d,i) {
+          self.pieMouseOver(d,i,this);
+        })
+        .on("mouseout", function(d,i) {
+          self.pieMouseOut(d,i,this);
+        })
+    },
+    pieMouseOver(d, i, context) {
+      this.svg.classed("hover", true)
+      select(context).classed("active", true)
+    },
+    pieMouseOut(d, i, context) {
+      this.svg.classed("hover", false)
+      select(context).classed("active", false )
+    },
+    yeet(name, value, e) {
+      console.log(name, value, e)
     }
   },
   watch: {
@@ -79,5 +96,14 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" > 
+  svg.hover path {
+    opacity: 0.5;
+    transition: opacity 0.2s;
+  }
+
+  .active {
+    opacity: 1 !important;
+  }  
+  
 </style>
