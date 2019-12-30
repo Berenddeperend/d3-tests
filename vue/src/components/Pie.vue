@@ -37,7 +37,7 @@ export default {
   },
   computed: {
     dataWithoutMonth() {
-      return (({ month, ...o }) => o)(this.data) // remove b and c
+      return (({ month, ...o }) => o)(this.data) //all minus 'month'
     },
     calcPie() {
       return pie()
@@ -52,8 +52,8 @@ export default {
   },
   mounted() {
     this.svg = select("#svg")
-      .attr("height", this.height)
-      .attr("width", this.width)
+      // .attr("height", this.height)
+      // .attr("width", this.width)
       .attr("viewBox", [
         -(this.width + this.margin.left + this.margin.right) / 2,
         -(this.height + this.margin.top + this.margin.bottom) / 2,

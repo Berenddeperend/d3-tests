@@ -5,15 +5,10 @@
 <script src="https://d3js.org/d3-scale.v2.min.js"></script>
 <script src="https://d3js.org/d3-axis.v1.min.js"></script>
 
-
-
-<!-- <script src="https://d3js.org/d3.v5.js"></script> -->
-
 <style>
-
 	svg {
-		/* box-shadow: inset 0px 0px 0 10px rgba(255, 0, 0, 0.1); */
-		/* border: 1px solid black; */
+		box-shadow: inset 0px 0px 0 10px rgba(255, 0, 0, 0.1);
+		border: 1px solid black;
 	}
 
 	.legendX {
@@ -46,16 +41,18 @@
 		opacity: 0.5;
 	}
 </style>
+
 </head>
 <body>
 <svg id="svg"></svg>
+<div style="width: 500px; height: 300px; background-color: rgba(255, 0, 0, 0.1)">targetsize</div>
 
 <button onclick="addDataPoint()">+</button>
 <script>
 
 const margin = {top: 10, right: 10, bottom: 50, left: 10};
-const width = 500
-const height = 300
+const width = 500 - margin.left - margin.right;
+const height = 300 - margin.top - margin.bottom;
 
 const data2 = [
 	{
@@ -98,9 +95,14 @@ const colors = [
 
 const svg = d3
 	.select("#svg")
-	// .attr("viewBox", [0, 0, width, height]);
-	.attr("height", height)
-	.attr("width", width);
+	.attr("viewBox", [
+		0,
+		0,
+		width + margin.left + margin.right,
+		height + margin.top + margin.bottom
+	])
+	// .attr("height", height + margin.top + margin.bottom)
+	// .attr("width", width + margin.left + margin.right);
 
 function handleMouseOver(d, i) {
 	const index = [...this.parentNode.children].indexOf(this);
@@ -137,15 +139,15 @@ function render() {
 				return acc;
 			}, 0);
 	}))])
-	.range([0, height - margin.top - margin.bottom]);
+	.range([0, height]);
 
-	const x = d3.scaleBand()
-	.domain(data2.map(d => d.month))
-	.range([0, width - margin.left - margin.right])
-	.padding(.8);
+	const x = d3
+		.scaleBand()
+		.domain(data2.map(d => d.month))
+		.range([0, width])
+		.paddingInner(.1);
 
-
-	var xAxis = d3
+	const xAxis = d3
 		.axisBottom(x)
 		.tickSize(0)
 		.tickFormat(d => d.charAt(0).toUpperCase());
@@ -155,6 +157,7 @@ function render() {
 	const legend = svg.append("g")
 		.attr("class", "legendX")
 		.attr("transform", `translate(${margin.left}, ${height - margin.bottom})`)
+		// .attr("transform", `translate(${margin.left}, ${height})`)
 		.call(xAxis)
 
 	const groups = svg.selectAll("g.cost")
@@ -169,8 +172,10 @@ function render() {
 		.join("rect")
 		.attr("height", d => y(d[1] - d[0]))
 		.attr("width", x.bandwidth())
+		// .attr("width", 20)
 		.attr("x", (d, i) => x(d.data.month) + margin.left)
 		.attr("y", d => height - y(d[1]) - margin.bottom)
+		// .attr("y", d => height - y(d[1]))
 		.attr("opacity", 1)
 		.on("mouseover", handleMouseOver)
 		.on("mouseout", handleMouseOut)
