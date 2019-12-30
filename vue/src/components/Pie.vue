@@ -1,7 +1,11 @@
 <template>
   <div class="pie-component">
     <table>
-      <tr v-for="(value, name) in dataWithoutMonth" :key="value.month" @mouseover="yeet(name, value, $event)">
+      <tr v-for="(value, name, index) in dataWithoutMonth" 
+          :key="value.month" 
+          @mouseover="tableMouseOver(name, value, index, $event)"
+          @mouseleave="tableMouseOut(name, value, index, $event)"
+        >
         <td>{{name}}:</td>
         <td>{{value}}</td>
       </tr>
@@ -68,6 +72,7 @@ export default {
         .join("path")
           .attr("fill", (d,i) => this.colors[i % this.colors.length])
           .attr("d", this.calcArc)
+          // .attr("id", d=> {console.log(d)})
         .on("mouseover", function(d,i) {
           self.pieMouseOver(d,i,this);
         })
@@ -83,9 +88,17 @@ export default {
       this.svg.classed("hover", false)
       select(context).classed("active", false )
     },
-    yeet(name, value, e) {
-      console.log(name, value, e)
-    }
+    tableMouseOver(name, value, index, e) {
+      this.svg.classed("hover", true)
+      this.svg
+        .select(`path:nth-of-type(${index + 1})`)
+        .classed("active", true)
+      console.log(name, value, index, e)
+    },
+    tableMouseOut(name, value, index, e) {
+      this.svg.classed("hover", false)
+      this.svg.selectAll(`path`).classed("active", false)
+    },
   },
   watch: {
     data(newData) {
