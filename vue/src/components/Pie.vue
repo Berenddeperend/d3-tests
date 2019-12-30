@@ -77,7 +77,6 @@ export default {
         .join("path")
           .attr("fill", (d,i) => this.colors[i % this.colors.length])
           .attr("d", this.calcArc)
-          // .attr("id", d=> {console.log(d)})
         .on("mouseover", function(d,i) {
           self.pieMouseOver(d,i,this);
         })
@@ -98,7 +97,6 @@ export default {
       this.svg
         .select(`path:nth-of-type(${index + 1})`)
         .classed("active", true)
-      console.log(name, value, index, e)
     },
     tableMouseOut(name, value, index, e) {
       this.svg.classed("hover", false)
@@ -107,7 +105,6 @@ export default {
   },
   watch: {
     data(newData) {
-      console.log(newData);
       this.render();
     }
   }
