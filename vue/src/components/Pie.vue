@@ -25,7 +25,7 @@ export default {
   data() {
     return {
       svg: null,
-      margin: { top: 10, right: 10, bottom: 10, left: 10 },
+      margin: { top: 20, right: 20, bottom: 20, left: 20 },
       width: 400,
       height: 400,
       colors: [
@@ -54,7 +54,12 @@ export default {
     this.svg = select("#svg")
       .attr("height", this.height)
       .attr("width", this.width)
-      .attr("viewBox", [-this.width / 2, -this.height / 2, this.width, this.height]);
+      .attr("viewBox", [
+        -(this.width + this.margin.left + this.margin.right) / 2,
+        -(this.height + this.margin.top + this.margin.bottom) / 2,
+        this.width + this.margin.left + this.margin.right,
+        this.height + this.margin.top + this.margin.bottom
+      ]);
 
     this.render();
   },
@@ -110,12 +115,16 @@ export default {
 </script>
 
 <style lang="scss" > 
+  svg path {
+    transition: opacity 0.2s, transform 0.2s;
+  }
+
   svg.hover path {
     opacity: 0.5;
-    transition: opacity 0.2s;
   }
 
   .active {
+    transform: scale(1.04);
     opacity: 1 !important;
   }  
   

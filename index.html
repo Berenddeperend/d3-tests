@@ -16,18 +16,24 @@
 		/* border: 1px solid black; */
 	}
 
+	.legendX {
+		color: #d8d8d8;
+	}
+
 	.tick text {
 		transform: translateY(10px);
 		font-size: 12px;
-		fill: grey;
+		color: #999999;
+		transition: color 0.2s;
 	}
 
 	.tick text.active {
-		fill: rgba(63, 150, 130, 1);
+		color: rgba(63, 150, 130, 1);
 		font-weight: bold;
 	}
 
 	rect {
+		cursor: pointer;
 		transition: opacity 0.2s;
 		opacity: 1;
 	}	
@@ -46,7 +52,6 @@
 
 <button onclick="addDataPoint()">+</button>
 <script>
-
 
 const margin = {top: 10, right: 10, bottom: 50, left: 10};
 const width = 500
@@ -137,7 +142,7 @@ function render() {
 	const x = d3.scaleBand()
 	.domain(data2.map(d => d.month))
 	.range([0, width - margin.left - margin.right])
-	.padding(.1);
+	.padding(.8);
 
 
 	var xAxis = d3
@@ -149,7 +154,7 @@ function render() {
 
 	const legend = svg.append("g")
 		.attr("class", "legendX")
-		.attr("transform", `translate(${margin.left}, ${height - margin.bottom + 20})`)
+		.attr("transform", `translate(${margin.left}, ${height - margin.bottom})`)
 		.call(xAxis)
 
 	const groups = svg.selectAll("g.cost")
@@ -170,7 +175,6 @@ function render() {
 		.on("mouseover", handleMouseOver)
 		.on("mouseout", handleMouseOut)
 		.on("click", handleMouseClick)
-
 }
 
 render();
